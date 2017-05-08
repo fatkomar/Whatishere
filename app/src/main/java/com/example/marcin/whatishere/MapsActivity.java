@@ -10,7 +10,6 @@ import android.location.LocationManager;
 import android.os.Bundle;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.FragmentActivity;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
@@ -29,10 +28,6 @@ import static java.lang.Double.valueOf;
 public class MapsActivity extends FragmentActivity implements OnMapReadyCallback {
 
     private GoogleMap mMap;
-    TextView t1;
-    TextView t2;
-    TextView t3;
-    TextView t4;
 
 
     private static final int MY_PERMISSION_REQUEST = 101;
@@ -81,7 +76,9 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             mMap.addMarker(new MarkerOptions()
                     .position(currentLocation)
                     .title("You are here"));
-            mMap.moveCamera(CameraUpdateFactory.newLatLng(currentLocation));
+
+            mMap.setMaxZoomPreference(15.0f);
+            mMap.animateCamera(CameraUpdateFactory.newLatLngZoom((currentLocation), 15.0f));
 
         }
 
@@ -91,19 +88,10 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             @Override
             public void onMapClick(LatLng point) {
                 mMap.clear();
-                mMap.animateCamera(CameraUpdateFactory.newLatLng(point));
-//                mMap.addMarker(new MarkerOptions()
-//                        .position(point)
-//                        .title(address)
-//                );
+                mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(point, 10.0f));
+                mMap.setMaxZoomPreference(15.0f);
                 double location2 = point.latitude;
                 double location3 = point.longitude;
-
-                t3 = (TextView) findViewById(R.id.textViewa);
-                t4 = (TextView) findViewById(R.id.textViewb);
-
-
-                t4.setText(String.valueOf(location3));
 
 
                 List<Address> addresses = null;
@@ -115,13 +103,28 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
 
                 String address = addresses.get(0).getAddressLine(0);
-                t3.setText(address);
+                if (address == null) {
+                    address = "";
+                }
+
+                String city = addresses.get(0).getLocality();
+                if (city == null) {
+                    city = "";
+                }
+
+                String country = addresses.get(0).getCountryName();
+                if (country == null) {
+                    country = "";
+                }
+
+
                 mMap.addMarker(new MarkerOptions()
                         .position(point)
-                        .title(address)
+                        .title(address + ", " + city + ", " + country)
                 );
 
-                Toast.makeText(MapsActivity.this, address, Toast.LENGTH_SHORT).show();
+                Toast.makeText(MapsActivity.this, address + ", " + city + ", " + country, Toast.LENGTH_SHORT).show();
+
 
             }
 
@@ -131,9 +134,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
 
     private void Refresh() {
-
-        t1 = (TextView) findViewById(R.id.textView1);
-        t2 = (TextView) findViewById(R.id.textView2);
 
 
         criteria = new Criteria();
@@ -156,10 +156,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             return;
         }
         location = locationManager.getLastKnownLocation(bestLocationProvider);
-
-
-        t1.setText(String.valueOf(location.getLatitude()));
-        t2.setText(String.valueOf(location.getLongitude()));
 
 
     }
